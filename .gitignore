@@ -1,0 +1,26 @@
+src/database/kinetic_guard.db
+
+# Entorno virtual
+.venv/
+env/
+venv/
+ENV/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Secretos
+.env
+.env.*
+!.env.example
+
+# Bases de datos y almacenamiento
+*.db
+*.sqlite3
+src/vector_store/
+
+# Sistema (macOS / Windows)
+.DS_Store
+Thumbs.db
