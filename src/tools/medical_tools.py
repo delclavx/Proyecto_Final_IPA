@@ -3,6 +3,10 @@ import sqlite3
 from langchain_openai import AzureOpenAIEmbeddings
 from langchain_community.vectorstores import Chroma
 from langchain_core.tools import tool
+from langchain_community.utilities import SQLDatabase
+from langchain_core.prompts import PromptTemplate
+from langchain_core.output_parsers import StrOutputParser
+from langchain_groq import ChatGroq
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -54,3 +58,44 @@ def obtener_metricas_atleta(atleta_id: str):
         return f"Error: No hay datos en SQL para el ID '{atleta_id_clean}'. Revisa setup_sql.py."
     
     return f"Datos reales del atleta encontrados: {rows}"
+
+# --- HERRAMIENTA 3: CONSULTA SQL DINÁMICA (Text-to-SQL) ---
+@tool
+def consultar_sql_dinamico(query: str):
+    """Consulta la base de datos de manera dinámica usando lenguaje natural para generar y ejecutar consultas SQL seguras."""
+    # Ruta a la base de datos
+    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    db_path = os.path.join(base_dir, "database", "kinetic_guard.db")
+    
+    # Conectar a la base de datos
+    db = SQLDatabase.from_uri(f"sqlite:///{db_path}")
+    
+    # Configurar el LLM para generar SQL
+    llm = ChatGroq(model="llama-3.3-70b-versatile", temperature=0)
+    
+    # Prompt para generar SQL
+    sql_prompt = PromptTemplate.from_template(
+        "Dado el esquema de la base de datos:\n{schema}\n\nGenera una consulta SQL para responder: {question}\nSolo devuelve la consulta SQL, sin explicaciones."
+    )
+    
+    # Cadena para generar SQL
+    chain = sql_prompt | llm | StrOutputParser()
+    
+    # Obtener esquema de la tabla
+    schema = db.get_table_info()
+    
+    # Generar la consulta SQL
+    try:
+        sql_query = chain.invoke({"schema": schema, "question": query}).strip()
+        # Limpiar posibles backticks o texto extra
+        if sql_query.startswith("```sql"):
+            sql_query = sql_query[6:]
+        if sql_query.endswith("```"):
+            sql_query = sql_query[:-3]
+        sql_query = sql_query.strip()
+        
+        # Ejecutar la consulta
+        result = db.run(sql_query)
+        return f"Consulta SQL generada: {sql_query}\n\nResultados: {result}"
+    except Exception as e:
+        return f"Error al generar o ejecutar la consulta: {str(e)}"

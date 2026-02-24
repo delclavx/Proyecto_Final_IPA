@@ -1129,6 +1129,18 @@ wheels = [
 ]
 
 [[package]]
+name = "langchain-experimental"
+version = "0.0.15"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "langchain" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/77/45/73c6924b7bc4915ffb926be113129491275df30442ef0c8987b8de0d1887/langchain_experimental-0.0.15.tar.gz", hash = "sha256:3ad7f551915f3a142187750332c46ba2a6fe5e41695907b9f50453e0201a49d7", size = 70486, upload-time = "2023-09-07T15:46:45.682Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/b6/26/4dad72f4689df58338ec3f85c18643a54771b99ae23a801e8f5d4141df38/langchain_experimental-0.0.15-py3-none-any.whl", hash = "sha256:5019015f7c2f1658f80933938b5e8a5289abdcea2bda77b13138cb8345f00bd5", size = 106981, upload-time = "2023-09-07T15:46:44.351Z" },
+]
+
+[[package]]
 name = "langchain-groq"
 version = "1.1.2"
 source = { registry = "https://pypi.org/simple" }
@@ -2082,6 +2094,7 @@ dependencies = [
     { name = "langchain-classic" },
     { name = "langchain-community" },
     { name = "langchain-core" },
+    { name = "langchain-experimental" },
     { name = "langchain-groq" },
     { name = "langchain-openai" },
     { name = "langchain-text-splitters" },
@@ -2212,6 +2225,7 @@ requires-dist = [
     { name = "langchain-classic", specifier = "==1.0.1" },
     { name = "langchain-community", specifier = "==0.4.1" },
     { name = "langchain-core", specifier = "==1.2.13" },
+    { name = "langchain-experimental", specifier = "==0.0.15" },
     { name = "langchain-groq", specifier = "==1.1.2" },
     { name = "langchain-openai", specifier = "==1.1.10" },
     { name = "langchain-text-splitters", specifier = "==1.1.0" },

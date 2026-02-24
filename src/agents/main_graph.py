@@ -5,14 +5,14 @@ from langchain_core.messages import SystemMessage
 from langchain_core.messages import ToolMessage
 from agents.state import AgentState
 from agents.prompts import SYSTEM_PROMPT
-from tools.medical_tools import consultar_protocolos_nsca, obtener_metricas_atleta
+from tools.medical_tools import consultar_protocolos_nsca, obtener_metricas_atleta, consultar_sql_dinamico
 
 # Configura el callback con tus credenciales (asegúrate de que están en el .env)
 langfuse_handler = CallbackHandler()
 
 # 1. Configuración del "Cerebro"
 llm = ChatGroq(model="llama-3.3-70b-versatile", temperature=0, callbacks=[langfuse_handler])
-tools = [consultar_protocolos_nsca, obtener_metricas_atleta]
+tools = [consultar_protocolos_nsca, obtener_metricas_atleta, consultar_sql_dinamico]
 llm_with_tools = llm.bind_tools(tools)
 
 # 2. Nodo de Inteligencia: El Analista
@@ -42,6 +42,8 @@ def execute_tools(state: AgentState):
             result = obtener_metricas_atleta.invoke(tool_call['args'])
         elif tool_call['name'] == "consultar_protocolos_nsca":
             result = consultar_protocolos_nsca.invoke(tool_call['args'])
+        elif tool_call['name'] == "consultar_sql_dinamico":
+            result = consultar_sql_dinamico.invoke(tool_call['args'])
         
         # Creamos el mensaje de respuesta de la herramienta
         tool_responses.append(ToolMessage(
