@@ -15,5 +15,3 @@ def consultar_ciencia(state):
 workflow = StateGraph(AgentState)
 workflow.add_node("analista_biometrico", analizar_biometria)
 workflow.add_node("consultor_nsca", consultar_ciencia)
-
-# El Estudiante 2 conectará estos nodos con flechas lógicas
