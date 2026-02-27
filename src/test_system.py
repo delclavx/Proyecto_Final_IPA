@@ -2,18 +2,10 @@ import os
 from dotenv import load_dotenv
 from langchain_groq import ChatGroq
 from langchain_core.messages import HumanMessage
-# NUEVA RUTA DE IMPORTACIÓN PARA LANGFUSE
-from langfuse.callback import CallbackHandler 
+from langfuse.langchain import CallbackHandler
 from tools.medical_tools import consultar_protocolos_nsca, obtener_metricas_atleta
 
 load_dotenv()
-
-# 1. Configurar Langfuse con la integración de 2026
-# Si el import anterior fallara, la alternativa es: from langfuse.langchain import CallbackHandler
-try:
-    from langfuse.callback import CallbackHandler
-except ImportError:
-    from langfuse.langchain import CallbackHandler
 
 langfuse_handler = CallbackHandler(
     public_key=os.getenv("LANGFUSE_PUBLIC_KEY"),

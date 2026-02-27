@@ -1,8 +1,9 @@
 from langgraph.graph import StateGraph, END
 from langchain_groq import ChatGroq
-from langfuse.callback import CallbackHandler
+from langfuse.langchain import CallbackHandler
 from langchain_core.messages import SystemMessage
 from langchain_core.messages import ToolMessage
+from langchain_core.runnables import RunnableConfig
 from agents.state import AgentState
 from agents.prompts import SYSTEM_PROMPT
 from tools.medical_tools import consultar_protocolos_nsca, obtener_metricas_atleta, consultar_sql_dinamico
@@ -16,7 +17,7 @@ tools = [consultar_protocolos_nsca, obtener_metricas_atleta, consultar_sql_dinam
 llm_with_tools = llm.bind_tools(tools)
 
 # 2. Nodo de Inteligencia: El Analista
-def call_model(state: AgentState):
+def call_model(state: AgentState, config: RunnableConfig):
     """Nodo principal que razona usando el System Prompt y las herramientas."""
     messages = state['messages']
     
@@ -24,11 +25,11 @@ def call_model(state: AgentState):
     if not any(isinstance(m, SystemMessage) for m in messages):
         messages = [SystemMessage(content=SYSTEM_PROMPT)] + messages
     
-    response = llm_with_tools.invoke(messages)
+    response = llm_with_tools.invoke(messages, config=config)
     return {"messages": [response]}
 
 # 3. Nodo de Acción: El Bibliotecario/Ejecutor
-def execute_tools(state: AgentState):
+def execute_tools(state: AgentState, config: RunnableConfig):
     """Nodo que ejecuta las herramientas y devuelve los resultados al historial."""
     messages = state['messages'] # Definimos la variable messages desde el estado
     last_message = messages[-1]
@@ -36,14 +37,15 @@ def execute_tools(state: AgentState):
     # Lista para guardar las respuestas de las herramientas
     tool_responses = []
     
+    # Pasamos config (con callbacks) para que las herramientas queden en la misma traza LangFuse
     for tool_call in last_message.tool_calls:
         # Ejecución de la herramienta
         if tool_call['name'] == "obtener_metricas_atleta":
-            result = obtener_metricas_atleta.invoke(tool_call['args'])
+            result = obtener_metricas_atleta.invoke(tool_call['args'], config=config)
         elif tool_call['name'] == "consultar_protocolos_nsca":
-            result = consultar_protocolos_nsca.invoke(tool_call['args'])
+            result = consultar_protocolos_nsca.invoke(tool_call['args'], config=config)
         elif tool_call['name'] == "consultar_sql_dinamico":
-            result = consultar_sql_dinamico.invoke(tool_call['args'])
+            result = consultar_sql_dinamico.invoke(tool_call['args'], config=config)
         
         # Creamos el mensaje de respuesta de la herramienta
         tool_responses.append(ToolMessage(

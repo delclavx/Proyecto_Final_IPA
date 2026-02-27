@@ -1,7 +1,7 @@
 import os
 from dotenv import load_dotenv
 from langchain_core.messages import HumanMessage
-from agents.main_graph import graph
+from agents.main_graph import graph, langfuse_handler
 
 load_dotenv()
 
@@ -9,8 +9,11 @@ def run_performance_assistant():
     print("--- Asistente de Rendimiento NSCA ---")
     print("(Escribe 'q' para salir)")
     
-    # ID de sesión para mantener la memoria de la conversación
-    config = {"configurable": {"thread_id": "sesion_entrenador_01"}}
+    # ID de sesión y callbacks para que toda la ejecución (grafo + herramientas) sea una sola traza en LangFuse
+    config = {
+        "configurable": {"thread_id": "sesion_entrenador_01"},
+        "callbacks": [langfuse_handler],
+    }
     
     while True:
         user_input = input("\nEntrenador: ")

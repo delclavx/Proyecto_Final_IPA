@@ -22,7 +22,7 @@ except ImportError:
         return lambda f: f
 
 # 3. Importar tu Grafo Real
-from src.main_graph import app
+from src.agents.main_graph import graph as app
 
 @observe(name="eval-dataset-query")
 def run_rag_query(query: str) -> dict:

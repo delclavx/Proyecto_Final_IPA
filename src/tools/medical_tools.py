@@ -1,18 +1,20 @@
 import os
 import sqlite3
 from langchain_openai import AzureOpenAIEmbeddings
-from langchain_community.vectorstores import Chroma
+from langchain_chroma import Chroma
 from langchain_core.tools import tool
 from langchain_community.utilities import SQLDatabase
 from langchain_core.prompts import PromptTemplate
 from langchain_core.output_parsers import StrOutputParser
 from langchain_groq import ChatGroq
 from dotenv import load_dotenv
+from langfuse import observe
 
 load_dotenv()
 
 # --- HERRAMIENTA 1: CONSULTA RAG (Conocimiento Científico) ---
 @tool
+@observe(name="rag-consultar-protocolos-nsca")
 def consultar_protocolos_nsca(query: str):
     """Consulta los manuales de la NSCA para obtener protocolos de recuperación, 
     prevención de lesiones y estándares de entrenamiento."""
@@ -61,6 +63,7 @@ def obtener_metricas_atleta(atleta_id: str):
 
 # --- HERRAMIENTA 3: CONSULTA SQL DINÁMICA (Text-to-SQL) ---
 @tool
+@observe(name="sql-generator")
 def consultar_sql_dinamico(query: str):
     """Consulta la base de datos de manera dinámica usando lenguaje natural para generar y ejecutar consultas SQL seguras."""
     # Ruta a la base de datos
