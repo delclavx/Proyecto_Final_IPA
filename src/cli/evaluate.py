@@ -1,18 +1,26 @@
-"""Script to evaluate RAG system on test examples."""
+"""Script definitivo para evaluar el sistema RAG con métricas de la NSCA."""
 
 import argparse
 import json
+import sys
+import os
 from datetime import datetime
 from pathlib import Path
 
+# 1. Configuración de rutas (Doble Path para evitar ModuleNotFoundError)
+root_path = Path(__file__).resolve().parent.parent
+sys.path.append(str(root_path))
+sys.path.append(str(root_path / "src"))
+
+# 2. Imports de Observabilidad y Configuración
 from langfuse import observe
 from langfuse.openai import OpenAI
 from rich.console import Console
 
 from src.config import settings
-from src.evaluation.evaluator import EvaluationExample, RAGEvaluator
-from src.evaluation.llm_judge import LLMJudge
-from src.evaluation.metrics import (
+from src.evaluation_core.evaluator import EvaluationExample, RAGEvaluator
+from src.evaluation_core.llm_judge import LLMJudge
+from src.evaluation_core.metrics import (
     AnswerRelevanceMetric,
     ContextRelevanceMetric,
     FaithfulnessMetric,
@@ -21,89 +29,30 @@ from src.observability.langfuse_client import configure_langfuse, flush_langfuse
 
 console = Console()
 
-# Configure LangFuse for @observe decorators
+# Inicializamos configuración de Langfuse
 configure_langfuse()
 
-
 def load_evaluation_examples(examples_file: Path) -> list[EvaluationExample]:
-    """
-    Load evaluation examples from JSON file.
-
-    Expected format:
-    [
-        {
-            "query": "What is RAG?",
-            "answer": "RAG stands for...",
-            "contexts": ["Context 1", "Context 2"],
-            "trace_id": "trace_123" (optional)
-        },
-        ...
-    ]
-
-    Args:
-        examples_file: Path to JSON file with evaluation examples
-
-    Returns:
-        List of EvaluationExample instances
-    """
-    with open(examples_file, "r") as f:
+    """Carga los ejemplos del dataset generado (JSON)."""
+    if not examples_file.exists():
+        raise FileNotFoundError(f"No se encuentra el archivo: {examples_file}")
+        
+    with open(examples_file, "r", encoding='utf-8') as f:
         data = json.load(f)
 
+    # Convertimos cada diccionario del JSON en un objeto de evaluación
     return [EvaluationExample(**example) for example in data]
 
-
-@observe(name="evaluation")
-def main() -> None:
-    """Run evaluation on examples."""
-    # Parse command-line arguments
-    parser = argparse.ArgumentParser(
-        description="Evaluate RAG system on test examples"
-    )
-    parser.add_argument(
-        "--examples-file",
-        type=str,
-        default="evaluations/evaluation_examples.json",
-        help="Path to evaluation examples JSON file (default: evaluations/evaluation_examples.json)",
-    )
-    parser.add_argument(
-        "--output-dir",
-        type=str,
-        default="evaluations/results",
-        help="Directory to save evaluation reports (default: evaluations/results)",
-    )
-    args = parser.parse_args()
-
-    # Configuration
-    examples_file = Path(args.examples_file)
-    output_dir = Path(args.output_dir)
-
-    if not examples_file.exists():
-        console.print(f"[red]Error: Examples file not found at {examples_file}[/]")
-        console.print("\n[yellow]Create a JSON file with evaluation examples:[/]")
-        console.print(
-            """
-[
-    {
-        "query": "What is retrieval augmented generation?",
-        "answer": "RAG is a technique that combines...",
-        "contexts": [
-            "Context paragraph 1...",
-            "Context paragraph 2..."
-        ],
-        "trace_id": "trace_123"
-    }
-]
-"""
-        )
-        return
-
+@observe(name="nsca-rag-evaluation")
+def run_evaluation(examples_file: Path, output_dir: Path):
+    """Ejecuta el proceso de evaluación y genera el reporte."""
+    
     try:
-        # Load evaluation examples
-        console.print(f"[bold blue]Loading evaluation examples from {examples_file}...[/]")
-        evaluation_examples = load_evaluation_examples(examples_file)
-        console.print(f"[green]Loaded {len(evaluation_examples)} evaluation examples[/]\n")
+        console.print(f"[bold blue]🧪 Cargando dataset desde {examples_file}...[/]")
+        examples = load_evaluation_examples(examples_file)
+        console.print(f"[green]✅ {len(examples)} ejemplos listos para evaluar.[/]\n")
 
-        # Initialize LLM judge
+        # Configuramos el Juez (Groq) usando tus Settings
         llm_client = OpenAI(
             api_key=settings.groq_api_key,
             base_url=settings.groq_base_url,
@@ -115,32 +64,43 @@ def main() -> None:
             temperature=0.0,
         )
 
-        # Initialize metrics (RAG Triad)
+        # Definimos la Tríada RAG para validar los protocolos NSCA
         metrics = [
-            FaithfulnessMetric(llm_judge),
-            AnswerRelevanceMetric(llm_judge),
-            ContextRelevanceMetric(llm_judge),
+            FaithfulnessMetric(llm_judge),      # ¿La respuesta está en el PDF?
+            AnswerRelevanceMetric(llm_judge),   # ¿Responde a lo que pidió el coach?
+            ContextRelevanceMetric(llm_judge),  # ¿El chunk del PDF es el correcto?
         ]
 
-        # Create evaluator
+        # Creamos el evaluador y lanzamos el proceso
         evaluator = RAGEvaluator(metrics=metrics)
+        for example in examples[:2]:
+            console.print(f"[yellow]Analizando Query:[/]: {example.query}")
+        report = evaluator.evaluate(evaluation_examples=examples)
 
-        # Run evaluation (scores are automatically sent to LangFuse)
-        report = evaluator.evaluate(evaluation_examples=evaluation_examples)
-
-        # Save report to file with timestamp
+        # Guardar reporte local con timestamp
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         output_dir.mkdir(parents=True, exist_ok=True)
-        output_file = output_dir / f"evaluation_report_{timestamp}.json"
+        output_path = output_dir / f"report_nsca_{timestamp}.json"
 
-        with open(output_file, "w") as f:
-            json.dump(report.model_dump(), f, indent=2)
+        with open(output_path, "w", encoding='utf-8') as f:
+            json.dump(report.model_dump(), f, indent=2, ensure_ascii=False)
 
-        console.print(f"\n[bold green]✓ Evaluation report saved to {output_file}[/]\n")
-    finally:
-        # Flush LangFuse traces to ensure they are sent
-        flush_langfuse()
+        console.print(f"\n[bold green]🏆 Evaluación completada con éxito![/]")
+        console.print(f"[yellow]Reporte guardado en: {output_path}[/]\n")
 
+    except Exception as e:
+        console.print(f"[bold red]❌ Error durante la evaluación: {e}[/]")
+
+def main():
+    parser = argparse.ArgumentParser(description="Evaluador oficial del Proyecto Final IPA")
+    parser.add_argument("--file", type=str, default="Evaluations/eval_dataset.json")
+    parser.add_argument("--out", type=str, default="Evaluations/results")
+    args = parser.parse_args()
+
+    run_evaluation(Path(args.file), Path(args.out))
+    
+    # Aseguramos que los resultados suban a Langfuse
+    flush_langfuse()
 
 if __name__ == "__main__":
     main()

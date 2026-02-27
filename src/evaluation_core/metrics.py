@@ -4,7 +4,7 @@ from abc import ABC, abstractmethod
 
 from pydantic import BaseModel, Field
 
-from src.evaluation.llm_judge import LLMJudge
+from src.evaluation_core.llm_judge import LLMJudge
 
 
 class EvaluationResult(BaseModel):
@@ -101,38 +101,54 @@ class FaithfulnessMetric(Metric):
         Returns:
             Evaluation result with faithfulness score (0-1)
         """
-        system_prompt = """You are an expert evaluator assessing the faithfulness of answers to their source contexts.
+#         system_prompt = """You are an expert evaluator assessing the faithfulness of answers to their source contexts.
 
-Your task is to:
-1. Extract all factual claims made in the answer
-2. For each claim, determine if it can be verified by the provided contexts
-3. A claim is supported ONLY if it can be directly inferred from the contexts
-4. Claims that contradict the contexts or add new information should be marked as not supported
+# Your task is to:
+# 1. Extract all factual claims made in the answer
+# 2. For each claim, determine if it can be verified by the provided contexts
+# 3. A claim is supported ONLY if it can be directly inferred from the contexts
+# 4. Claims that contradict the contexts or add new information should be marked as not supported
 
-Be strict in your evaluation - if a claim cannot be clearly verified, mark it as not supported."""
+# Be strict in your evaluation - if a claim cannot be clearly verified, mark it as not supported."""
+        system_prompt = """You are an expert sports performance evaluator assessing the faithfulness of answers to their source contexts.
+
+        Your task is to:
+        1. Extract all factual claims made in the answer.
+        2. For each claim, determine if it can be verified by the provided contexts.
+        3. IMPORTANT: Contexts may contain TECHNICAL PDF TEXT or SQL DATABASE RECORDS (e.g., sleep hours, RPE, dates in tuples).
+        4. A claim is supported if:
+        - It matches the technical guidelines in the NSCA PDF.
+        - It is a correct summary or calculation of the provided SQL data (e.g., if SQL shows 7.0, 7.5 and 6.5, an answer saying 'average of 7h' is SUPPORTED).
+
+        Be strict with technical protocols but allow for mathematical summaries of numerical data found in the SQL contexts."""
 
         contexts_text = "\n\n".join(
             [f"<context id=\"{i+1}\">\n{ctx}\n</context>" for i, ctx in enumerate(contexts)]
         )
 
-        user_prompt = f"""<question>
-{query}
-</question>
+#         user_prompt = f"""<question>
+# {query}
+# </question>
 
-<answer>
-{answer}
-</answer>
+# <answer>
+# {answer}
+# </answer>
 
-<retrieved_contexts>
-{contexts_text}
-</retrieved_contexts>
+# <retrieved_contexts>
+# {contexts_text}
+# </retrieved_contexts>
 
-Extract all claims from the answer and verify each against the contexts.
-For each claim, return:
-- claim: the text of the claim
-- is_supported: boolean indicating if the claim is supported by the contexts
+# Extract all claims from the answer and verify each against the contexts.
+# For each claim, return:
+# - claim: the text of the claim
+# - is_supported: boolean indicating if the claim is supported by the contexts
 
-"""
+# """
+        user_prompt = f"""<question>{query}</question>
+        <retrieved_contexts>{contexts_text}</retrieved_contexts>
+
+        Rate if these contexts contain the specific NSCA guidelines or athlete data needed to answer. 
+        A score of 5 means the context contains the EXACT rule (like the <7h sleep injury risk) or the EXACT athlete records needed."""
 
         response = self.llm_judge.evaluate(
             system_prompt=system_prompt,

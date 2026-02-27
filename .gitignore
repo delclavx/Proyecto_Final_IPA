@@ -24,3 +24,8 @@ src/vector_store/
 # Sistema (macOS / Windows)
 .DS_Store
 Thumbs.db
+
+# Añade esto a tu archivo .gitignore
+Evaluations/results/
+*.json
+.env

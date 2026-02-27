@@ -34,7 +34,28 @@ Asistente de rendimiento basado en NSCA con RAG (ChromaDB) y base de datos SQLit
 
    Escribe `q` o `exit` para salir del asistente.
 
+5. **Create evaluation dataset**  
+   Desde la raíz del proyecto:
+
+   ```bash
+   PYTHONPATH=.:src uv run python src/cli/create_eval_dataset.py \
+    --queries-file Evaluations/my_queries.json \
+    --output-file Evaluations/eval_dataset.json \
+    -n 7
+   ```
+
+6. **Evaluate**  
+   Desde la raíz del proyecto:
+
+   ```bash
+   uv run python -m src.cli.evaluate
+   ```
+
+
 ## Requisitos
 
 - Python ≥ 3.11  
 - Dependencias gestionadas con `uv` (ver `pyproject.toml`)
+
+
+#Dime cuando ha dormido de media en enero el atleta 1?

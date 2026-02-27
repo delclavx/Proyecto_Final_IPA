@@ -12,7 +12,7 @@ from rich.table import Table
 from tqdm import tqdm
 
 from src.config import settings
-from src.evaluation.metrics import Metric
+from src.evaluation_core.metrics import Metric
 
 console = Console()
 

@@ -24,26 +24,80 @@ except ImportError:
 # 3. Importar tu Grafo Real
 from src.agents.main_graph import graph as app
 
+# @observe(name="eval-dataset-query")
+# def run_rag_query(query: str) -> dict:
+#     """Ejecuta la consulta a través de tu grafo de agentes."""
+#     console.print(f"🔍 Procesando consulta: [cyan]{query}[/]")
+    
+#     # Invocación de tu grafo
+#     inputs = {"messages": [("user", query)]}
+#     config = {"configurable": {"thread_id": "eval_session"}}
+    
+#     response = app.invoke(inputs, config)
+    
+#     # Extraemos la respuesta final del asistente
+#     answer = response["messages"][-1].content
+
+#     return {
+#         "query": query,
+#         "answer": answer,
+#         "contexts": ["Información recuperada de los manuales de la NSCA"],
+#         "trace_id": "eval_gen_id"
+#     }
 @observe(name="eval-dataset-query")
 def run_rag_query(query: str) -> dict:
-    """Ejecuta la consulta a través de tu grafo de agentes."""
+    """Ejecuta la consulta manejando mensajes tipo tupla o tipo objeto."""
     console.print(f"🔍 Procesando consulta: [cyan]{query}[/]")
     
-    # Invocación de tu grafo
     inputs = {"messages": [("user", query)]}
-    config = {"configurable": {"thread_id": "eval_session"}}
+    config = {"configurable": {"thread_id": "eval_session_nsca"}}
     
-    response = app.invoke(inputs, config)
-    
-    # Extraemos la respuesta final del asistente
-    answer = response["messages"][-1].content
+    try:
+        response = app.invoke(inputs, config)
+        
+        # 1. Extraer la respuesta final (el último mensaje)
+        last_msg = response["messages"][-1]
+        
+        # Manejo de mensaje tipo Tupla ("assistant", "contenido") o tipo Objeto
+        if isinstance(last_msg, tuple):
+            answer = last_msg[1]
+        else:
+            answer = last_msg.content
 
-    return {
-        "query": query,
-        "answer": answer,
-        "contexts": ["Información recuperada de los manuales de la NSCA"],
-        "trace_id": "eval_gen_id"
-    }
+        # 2. Extracción de Chunks (Contextos reales)
+        actual_contexts = []
+        for msg in response["messages"]:
+            content = ""
+            # Extraer contenido según formato
+            if isinstance(msg, tuple):
+                content = msg[1]
+            elif hasattr(msg, "content"):
+                content = msg.content
+            
+            # Buscamos si este mensaje contiene información técnica de los PDFs
+            # Normalmente las herramientas devuelven el texto del PDF aquí
+            if "Source:" in str(content) or "Contexto:" in str(content) or len(str(content)) > 200:
+                # Si el mensaje es muy largo o cita fuentes, es un contexto
+                if content != answer: # Evitamos duplicar la respuesta final
+                    actual_contexts.append(content)
+
+        if not actual_contexts:
+            actual_contexts = ["El contexto se integró directamente en la respuesta o se obtuvo de la base de datos SQL."]
+
+        return {
+            "query": query,
+            "answer": answer,
+            "contexts": actual_contexts,
+            "trace_id": "eval_gen_id"
+        }
+    except Exception as e:
+        return {
+            "query": query,
+            "answer": f"Error en el flujo del grafo: {str(e)}",
+            "contexts": [],
+            "trace_id": "error_id"
+        }
+
 
 def load_queries(queries_file: Path) -> list:
     with open(queries_file, "r", encoding='utf-8') as f:

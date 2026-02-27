@@ -1,7 +1,11 @@
 {
     "queries": [
-        "¿Qué es la regla 50/30/20/10?",
         "¿Cuáles son los síntomas de la rabdomiólisis?",
-        "Analiza el sueño del atleta_01"
+        "Analiza el sueño del atleta_01",
+        "¿Qué es la regla 50/30/20/10?",
+        "¿Qué temperatura rectal indica un golpe de calor (EHS) según la NSCA?",
+        "¿Cuál es el protocolo de hidratación para prevenir la hiponatremias?",
+        "Explica la importancia del Plan de Acción de Emergencia (EAP) en el gimnasio.",
+        "¿Cómo afecta dormir menos de 7 horas al riesgo de lesiones no traumáticas?"
     ]
 }

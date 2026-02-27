@@ -1,0 +1,58 @@
+[
+    {
+        "query": "What is the 50/30/20/10 rule for returning athletes?",
+        "answer": "It is a safety guideline that mandates a 50% reduction in maximum conditioning volume in the first week of return after inactivity, followed by reductions of 30%, 20%, and 10% in the subsequent three weeks.",
+        "contexts": [
+            "The Joint Committee recommends that prescription of conditioning drills after the period of inactivity follows a schedule of reduced volume or workload adhering to the 50/30/20/10 rules for a 2-week period (for returning athletes) or a 4-week period (for new athletes). [cite: 2245, 2253]"
+        ],
+        "trace_id": "eval_003"
+    },
+    {
+        "query": "According to the FIT rule, what is the maximum recommended frequency for weight training in the first week back?",
+        "answer": "The frequency for a specific muscle group or movement type should not exceed 3 sessions per week during the first week following a period of inactivity.",
+        "contexts": [
+            "It is recommended that frequency not exceed 3 days in the first week following a period of inactivity and no more than 4 days in the second week. [cite: 2335, 2405]"
+        ],
+        "trace_id": "eval_004"
+    },
+    {
+        "query": "What are the primary diagnostic criteria for Exertional Heat Stroke (EHS)?",
+        "answer": "The two main criteria are central nervous system (CNS) dysfunction and a core body temperature greater than 105°F (40.5°C).",
+        "contexts": [
+            "The 2 main diagnostic criteria for EHS are CNS dysfunction and a core temperature greater than 105°F (or 40.5°C). [cite: 2049, 2112]"
+        ],
+        "trace_id": "eval_005"
+    },
+    {
+        "query": "What is the recommended work-to-rest (W:R) ratio for weight training during the first week of a transition period?",
+        "answer": "A minimum work-to-rest ratio of 1:4 or greater should be applied to all weight training activity during the first week.",
+        "contexts": [
+            "The Joint Committee recommends that all weight training activity use a 1:4 or greater W:R during week 1 and a 1:3 or greater W:R during week 2. [cite: 2362, 2405]"
+        ],
+        "trace_id": "eval_006"
+    },
+    {
+        "query": "Which laboratory marker is considered the most sensitive for indicating muscle injury in cases of Exertional Rhabdomyolysis (ER)?",
+        "answer": "An elevated plasma creatine kinase (CK) level is the most sensitive laboratory marker for muscle injury.",
+        "contexts": [
+            "An elevated plasma CK level is the most sensitive laboratory marker, indicating muscle injury, hyperkalemia, compartment syndrome, and acute renal failure. [cite: 2150]"
+        ],
+        "trace_id": "eval_007"
+    },
+    {
+        "query": "Analiza el sueño del atleta_01",
+        "answer": "Para poder evaluar el sueño del atleta_01, voy a consultar la base de datos y extraer los registros de sueño correspondientes. El sistema delegará automáticamente esta tarea al Agente Analista SQL. Una vez que tenga los datos, elaboraré el análisis siguiendo el formato solicitado.",
+        "contexts": [
+            "El contexto se integró directamente en la respuesta o se obtuvo de la base de datos SQL."
+        ],
+        "trace_id": "eval_gen_id"
+    },
+    {
+        "query": "¿Cuáles son los síntomas de la rabdomiólisis?",
+        "answer": "*Síntomas de la rabdomiólisis (destrucción muscular aguda)*  \n\n| Síntoma | Descripción | Relevancia clínica |\n|---------|-------------|--------------------|\n| *Dolor muscular intenso* | Dolor profundo y generalizado, especialmente en músculos grandes (cuádriceps, glúteos, espalda). | Puede indicar daño muscular severo. |\n| *Hinchazón y rigidez* | Músculos inflamados y tensos. | Señal de inflamación y daño tisular. |\n| *Debilidad muscular* | Dificultad para mover los músculos afectados. | Puede limitar la movilidad y la función diaria. |\n| *Orina oscura o cola de huevo* | Coloración rojiza o marrón oscuro. | Indica presencia de mioglobina, una proteína que se filtra en la orina. |\n| *Fatiga extrema* | Sensación de cansancio inusual, incluso con descanso. | Refleja la pérdida de energía y la sobrecarga del sistema. |\n| *Náuseas, vómitos o dolor abdominal* | Síntomas gastrointestinales. | Pueden acompañar la inflamación sistémica. |\n| *Elevación de enzimas musculares* (CK, LDH) | Se detecta en análisis de sangre. | Confirmación diagnóstica de daño muscular. |\n| *Síntomas de insuficiencia renal* (disminución de la producción de orina, edema) | Riesgo de daño renal por mioglobina. | Necesita intervención médica urgente. |\n\n### ¿Qué hacer si sospechas rabdomiólisis?\n1. *Detén la actividad física* y descansa.  \n2. *Hidrátate: bebe agua (o soluciones isotónicas) para ayudar a diluir la mioglobina y proteger los riñones.  \n3. **Busca atención médica inmediata* si observas orina oscura, dolor muscular extremo, debilidad severa o cualquier signo de insuficiencia renal.  \n4. *Monitorea la ingesta de líquidos: una pérdida de peso > 2 % después del entrenamiento indica deshidratación crítica y aumenta el riesgo de complicaciones.  \n\n> **Alerta NSCA: la presencia de orina oscura o dolor extremo debe considerarse una señal de **rabdomiólisis* y requiere atención médica urgente.  \n\nSi necesitas más información sobre protocolos de prevención o recuperación, dime y consulto los manuales de la NSCA.",
+        "contexts": [
+            "El contexto se integró directamente en la respuesta o se obtuvo de la base de datos SQL."
+        ],
+        "trace_id": "eval_gen_id"
+    }
+]
