@@ -29,7 +29,7 @@ Asistente de rendimiento basado en NSCA con RAG (ChromaDB) y base de datos SQLit
    Desde la raíz del proyecto:
 
    ```bash
-   cd src && uv run python main.py
+   uv run python src/main.py
    ```
 
    Escribe `q` o `exit` para salir del asistente.

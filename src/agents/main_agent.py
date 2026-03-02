@@ -1,5 +1,5 @@
 from langgraph.graph import StateGraph, END
-from tools.medical_tools import consultar_protocolos_nsca, obtener_metricas_atleta
+from tools.medical_tools import consultar_protocolos_nsca
 
 # 1. Definir el nodo que analiza los datos del SQL
 def analizar_biometria(state):
